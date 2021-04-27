@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  poke:
+    build:
+      context: .
+    image: poke
+    container_name: poke
+    command: npm run serve
+    volumes:
+      - ./config:/poke/config

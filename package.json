@@ -1,0 +1,28 @@
+{
+  "name": "hot-poke",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.ts",
+  "scripts": {
+    "init": "node init_config.js",
+    "serve": "ts-node -r tsconfig-paths/register app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HOT-Protocol/hot-poke.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HOT-Protocol/hot-poke/issues"
+  },
+  "homepage": "https://github.com/HOT-Protocol/hot-pokee#readme",
+  "dependencies": {
+    "ethereumjs-tx": "^2.1.2",
+    "keythereum": "^1.2.0",
+    "log4js": "^6.3.0",
+    "tsconfig-paths": "^3.9.0",
+    "web3": "^1.3.4"
+  }
+}
