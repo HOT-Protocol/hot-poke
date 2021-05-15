@@ -111,7 +111,7 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
 
         if (getTimestamp() - lastTime >= 60 * 60 * 24) {
             try {
-                const hash = await dripJug(web3, jug, address, privateKey, nonce+1, 'HOT-A')
+                const hash = await dripJug(web3, jug, address, privateKey, nonce+2, 'HOT-A')
                 lastTime = getTimestamp()
                 logger.info('call drip method of Jug, hash: %s', hash)
             } catch (error) {
