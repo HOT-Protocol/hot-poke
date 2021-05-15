@@ -1,11 +1,12 @@
 {
-    "network": "goerli",
+    "network": "kovan",
     "interval": 3600,
     "infura_key": "",
     "keystore": {"version":3,"crypto":{"kdf":"scrypt","cipher":"aes-128-ctr","cipherparams":{"iv":"******"},"kdfparams":{"p":1,"n":262144,"dklen":32,"r":8,"salt":"******"},"mac":"******","ciphertext":"******"},"id":"******","address":"******"},
     "password": "******",
     "contract": {
-      "PIP_HOT": "0xd2444C376271896CF6eeac2Af8A7A1CD0C2FcE87",
-      "MCD_SPOT": "0xEe7B2d1f57162f6332CB66FA00A30ee3a2e7914e"
+      "PIP_HOT": "0x4E9F03c463aF0DAa21A4ca989b7dd2ce2d56c673",
+      "MCD_JUG": "0xb1e1D7a35B5dcEe1882CC94104B476820C9acE87",
+      "MCD_SPOT": "0xC686F6b98dA1FA19916eB832b8D14A0bb128f1E8"
     }
 }

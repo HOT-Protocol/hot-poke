@@ -1,11 +1,11 @@
 version: "3"
 
 services:
-  poke:
+  poke-drip:
     build:
       context: .
-    image: poke
-    container_name: poke
+    image: poke-drip
+    container_name: poke-drip
     command: npm run serve
     volumes:
-      - ./config:/poke/config
+      - ./config:/poke-drip/config
