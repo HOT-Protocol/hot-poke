@@ -84,7 +84,7 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
     const network = await web3.eth.net.getNetworkType()
     logger.info('ethereum network type: %s', network)
 
-    const osm = new web3.eth.Contract(OSM, serverConfig.contract.PIP_HOT)
+    const osm = new web3.eth.Contract(OSM, serverConfig.contract.PIP_ETH)
     const jug = new web3.eth.Contract(JUG, serverConfig.contract.MCD_JUG)
     const spot = new web3.eth.Contract(SPOT, serverConfig.contract.MCD_SPOT)
     const address = '0x' + serverConfig.keystore.address
@@ -103,7 +103,7 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
         }
 
         try {
-            const hash = await pokeSpot(web3, spot, address, privateKey, nonce+1, 'HOT-A')
+            const hash = await pokeSpot(web3, spot, address, privateKey, nonce+1, 'ETH-A')
             logger.info('call poke method of Spot, hash: %s', hash)
         } catch (error) {
             logger.error('failed to call poke method of Spot, reason: %s', error)
@@ -111,7 +111,7 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
 
         if (getTimestamp() - lastTime >= 60 * 60 * 24) {
             try {
-                const hash = await dripJug(web3, jug, address, privateKey, nonce+2, 'HOT-A')
+                const hash = await dripJug(web3, jug, address, privateKey, nonce+2, 'ETH-A')
                 lastTime = getTimestamp()
                 logger.info('call drip method of Jug, hash: %s', hash)
             } catch (error) {
