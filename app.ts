@@ -1,16 +1,17 @@
+import BN from 'bn.js'
 import Web3 from 'web3'
+import { Wallet } from 'ethers'
 import { fromAscii } from 'web3-utils'
+import { Contract } from 'web3-eth-contract'
+import { TransactionRequest } from '@ethersproject/abstract-provider'
+
 import { JUG } from '@src/abi/jug'
 import { OSM } from '@src/abi/osm'
 import { SPOT } from '@src/abi/spot'
 import { sleep } from '@src/sleep'
 import { logger } from '@src/logger'
 import { WaitGroup } from '@src/waitgroup'
-import { Transaction } from 'ethereumjs-tx'
-import { Contract } from 'web3-eth-contract'
-import * as serverConfig from '@config/server.json'
-
-const keythereum = require('keythereum');
+import * as config from '@config/server.json'
 
 function getTimestamp() {
 	return Math.floor(Date.now() / 1000)
@@ -31,35 +32,34 @@ async function next(web3: Web3, address: string) {
     return await web3.eth.getTransactionCount(address, 'pending')
 }
 
-async function pokeOSM(web3: Web3, contract: Contract, address: string, privKey: Buffer, nonce: number) {
+async function pokeOSM(web3: Web3, chainId: number, contract: Contract, wallet: Wallet, nonce: number) {
     const data = contract.methods.poke().encodeABI()
-    return await sendTransaction(web3, address, privKey, contract.options.address, nonce, data)
+    return await sendTransaction(web3, chainId, wallet, contract.options.address, nonce, data)
 }
 
-async function pokeSpot(web3: Web3, contract: Contract, address: string, privKey: Buffer, nonce: number, ilk: string) {
+async function pokeSpot(web3: Web3, chainId: number, contract: Contract, wallet: Wallet, nonce: number, ilk: string) {
     const data = contract.methods.poke(toBytes32(ilk)).encodeABI()
-    return await sendTransaction(web3, address, privKey, contract.options.address, nonce, data)
+    return await sendTransaction(web3,chainId,  wallet, contract.options.address, nonce, data)
 }
 
-async function dripJug(web3: Web3, contract: Contract, address: string, privKey: Buffer, nonce: number, ilk: string) {
+async function dripJug(web3: Web3, chainId: number, contract: Contract, wallet: Wallet, nonce: number, ilk: string) {
     const data = contract.methods.drip(toBytes32(ilk)).encodeABI()
-    return await sendTransaction(web3, address, privKey, contract.options.address, nonce, data)
+    return await sendTransaction(web3, chainId, wallet, contract.options.address, nonce, data)
 }
 
-async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to: string, nonce: number, data: string) {
-    const gasPrice = await web3.eth.getGasPrice()
-    let rawTransaction: Object = {
-        from: from,
+async function sendTransaction(web3: Web3, chainId: number, wallet: Wallet, to: string, nonce: number, data: string) {
+    let rawTransaction: TransactionRequest = {
+        type: 2,
+        chainId: chainId,
         to: to,
-        data: data,
-        value: 0,
+        from: wallet.address,
         nonce: nonce,
-        gasLimit: web3.utils.toHex(120000),
-        gasPrice: web3.utils.toHex(gasPrice)
+        gasLimit: web3.utils.toHex(config.gasLimit),
+        data: data,
+        maxPriorityFeePerGas: web3.utils.toHex(web3.utils.toWei(new BN(1), 'Gwei')),
+        maxFeePerGas: web3.utils.toHex(web3.utils.toWei(new BN(config.maxFeePerGas), 'Gwei')),
     }
-    const tx = new Transaction(rawTransaction, {chain: serverConfig.network})
-    tx.sign(privateKey)
-    const serializedTx = '0x' + tx.serialize().toString('hex')
+    const serializedTx = await wallet.signTransaction(rawTransaction)
 
     let hash: string = ''
     let error: any = null
@@ -79,31 +79,35 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
 }
 
 (async () => {
-    const host = `https://${serverConfig.network}.infura.io/v3/${serverConfig.infura_key}`
-    const web3 = new Web3(new Web3.providers.HttpProvider(host))
-    const network = await web3.eth.net.getNetworkType()
-    logger.info('ethereum network type: %s', network)
+    const web3 = new Web3(new Web3.providers.HttpProvider(config.endpoint))
+    const chainId = await web3.eth.getChainId()
+    logger.info('ethereum chain id: %s', chainId)
 
-    const osm = new web3.eth.Contract(OSM, serverConfig.contract.PIP_ETH)
-    const jug = new web3.eth.Contract(JUG, serverConfig.contract.MCD_JUG)
-    const spot = new web3.eth.Contract(SPOT, serverConfig.contract.MCD_SPOT)
-    const address = '0x' + serverConfig.keystore.address
-    const privateKey = keythereum.recover(serverConfig.password, serverConfig.keystore)
-    logger.info('poke user address: %s', address)
+    const osm = new web3.eth.Contract(OSM, config.contract.PIP)
+    const jug = new web3.eth.Contract(JUG, config.contract.MCD_JUG)
+    const spot = new web3.eth.Contract(SPOT, config.contract.MCD_SPOT)
+
+    var hexPrivateKey = config.privateKey
+    if (hexPrivateKey.startsWith('0x') || hexPrivateKey.startsWith('0X')) {
+        hexPrivateKey = hexPrivateKey.substring(2)
+    } 
+
+    const wallet = new Wallet(hexPrivateKey)
+    logger.info('poke user address: %s', wallet.address)
 
     let lastTime = 0
     while (true) {
-        const nonce = await next(web3, address)
+        const nonce = await next(web3, wallet.address)
 
         try {
-            const hash = await pokeOSM(web3, osm, address, privateKey, nonce)
+            const hash = await pokeOSM(web3, chainId, osm, wallet, nonce)
             logger.info('call poke method of OSM, hash: %s', hash)
         } catch (error) {
             logger.error('failed to call poke method of OSM, reason: %s', error)
         }
 
         try {
-            const hash = await pokeSpot(web3, spot, address, privateKey, nonce+1, 'ETH-A')
+            const hash = await pokeSpot(web3, chainId, spot, wallet, nonce+1, config.ilkName)
             logger.info('call poke method of Spot, hash: %s', hash)
         } catch (error) {
             logger.error('failed to call poke method of Spot, reason: %s', error)
@@ -111,7 +115,7 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
 
         if (getTimestamp() - lastTime >= 60 * 60 * 24) {
             try {
-                const hash = await dripJug(web3, jug, address, privateKey, nonce+2, 'ETH-A')
+                const hash = await dripJug(web3, chainId, jug, wallet, nonce+2, config.ilkName)
                 lastTime = getTimestamp()
                 logger.info('call drip method of Jug, hash: %s', hash)
             } catch (error) {
@@ -119,7 +123,7 @@ async function sendTransaction(web3: Web3, from: string, privateKey: Buffer, to:
             } 
         }
 
-        logger.info(`wait for ${serverConfig.interval} seconds...`)
-        await sleep(serverConfig.interval * 1000)
+        logger.info(`wait for ${config.interval} seconds...`)
+        await sleep(config.interval * 1000)
     }
 })()

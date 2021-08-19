@@ -1,5 +1,5 @@
 {
-  "name": "hot-poke",
+  "name": "poke-drip-bot",
   "version": "1.0.0",
   "description": "",
   "main": "app.ts",
@@ -10,19 +10,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HOT-Protocol/hot-poke.git"
+    "url": "git+https://github.com/HOT-Protocol/poke-drip-bot.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/HOT-Protocol/hot-poke/issues"
+    "url": "https://github.com/HOT-Protocol/poke-drip-bot/issues"
   },
-  "homepage": "https://github.com/HOT-Protocol/hot-pokee#readme",
+  "homepage": "https://github.com/HOT-Protocol/poke-drip-bot#readme",
   "dependencies": {
-    "ethereumjs-tx": "^2.1.2",
-    "keythereum": "^1.2.0",
+    "ethers": "^5.4.5",
     "log4js": "^6.3.0",
     "tsconfig-paths": "^3.9.0",
-    "web3": "^1.3.4"
+    "web3": "^1.5.2"
   }
 }

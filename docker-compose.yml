@@ -4,8 +4,8 @@ services:
   poke-drip:
     build:
       context: .
-    image: poke-drip
-    container_name: poke-drip
+    image: poke-drip-bot
+    container_name: poke-drip-bot
     command: npm run serve
     volumes:
-      - ./config:/poke-drip/config
+      - ./config:/poke-drip-bot/config

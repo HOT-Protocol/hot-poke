@@ -1,11 +1,13 @@
 {
     "network": "kovan",
     "interval": 3600,
-    "infura_key": "",
-    "keystore": {"version":3,"crypto":{"kdf":"scrypt","cipher":"aes-128-ctr","cipherparams":{"iv":"******"},"kdfparams":{"p":1,"n":262144,"dklen":32,"r":8,"salt":"******"},"mac":"******","ciphertext":"******"},"id":"******","address":"******"},
-    "password": "******",
+    "endpoint": "https://kovan.poa.network",
+    "gasLimit": 200000,
+    "maxFeePerGas": 180,
+    "privateKey": "0x000000000000000000000000000000000000000000000000000000000000000000",
+    "ilkName": "nMGC-A",
     "contract": {
-      "PIP_ETH": "0x4E9F03c463aF0DAa21A4ca989b7dd2ce2d56c673",
+      "PIP": "0x93811160b76e51CA7c32a507677DeB202498d203",
       "MCD_JUG": "0xb1e1D7a35B5dcEe1882CC94104B476820C9acE87",
       "MCD_SPOT": "0xC686F6b98dA1FA19916eB832b8D14A0bb128f1E8"
     }
